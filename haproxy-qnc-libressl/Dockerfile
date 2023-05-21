@@ -1,11 +1,10 @@
 FROM ubuntu:20.04 AS builder-ssl
 
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get -y update && apt-get -y install git make gcc wget libasan5
+RUN apt-get -y update && apt-get -y install git make gcc wget libasan5 autoconf libtool
 
-RUN wget https://cdn.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.7.2.tar.gz
-RUN tar xvf libressl-3.7.2.tar.gz
-RUN cd libressl-3.7.2 && CFLAGS="-ggdb -fsanitize=address" LDFLAGS="-fsanitize=address" ./configure && make -j$(nproc) && make install
+RUN git clone https://github.com/libressl/portable
+RUN cd portable && ./autogen.sh && ./configure && make dist && tar xvf libressl-* && cd libressl-* && CFLAGS="-ggdb -fsanitize=address" LDFLAGS="-fsanitize=address" ./configure && make -j$(nproc) && make install
 
 FROM ubuntu:20.04 AS builder
 
@@ -52,7 +51,6 @@ COPY --from=builder-ssl \
   /usr/local/lib/libssl.so* /usr/local/lib/libcrypto.so* /usr/local/lib/
 COPY --from=builder /usr/local/sbin/haproxy /usr/local/sbin/
 COPY quic.cfg lighttpd.cfg /
-COPY sslkeylogger.lua /
 
 COPY run_endpoint.sh .
 RUN chmod +x run_endpoint.sh
