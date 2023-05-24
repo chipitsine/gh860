@@ -16,10 +16,9 @@ ADD *.patch /tmp/
 ADD https://api.github.com/repos/haproxytech/quic-dev/git/refs/heads/qns version.json
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -y update && apt-get -y install git make gcc liblua5.3-0 liblua5.3-dev \
-  && git clone --depth 1 -b qns https://github.com/haproxytech/quic-dev haproxy \
+  && git clone --depth 1 https://github.com/chipitsine/haproxy haproxy \
   && cd /haproxy \
   && patch -p1 < /tmp/0001-Add-timestamps-to-stderr-sink.patch \
-  && patch -p1 < /tmp/0001-test.patch \
   && make -j $(nproc) \
     CC=gcc \
     TARGET=linux-glibc \
@@ -51,6 +50,7 @@ COPY --from=builder-ssl \
   /usr/local/lib/libssl.so* /usr/local/lib/libcrypto.so* /usr/local/lib/
 COPY --from=builder /usr/local/sbin/haproxy /usr/local/sbin/
 COPY quic.cfg lighttpd.cfg /
+COPY sslkeylogger.lua /
 
 COPY run_endpoint.sh .
 RUN chmod +x run_endpoint.sh
