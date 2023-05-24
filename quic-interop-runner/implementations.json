@@ -5,7 +5,7 @@
     "role": "client"
   },
   "haproxy": {
-    "image": "haproxy-qns-libressl:latest",
+    "image": "haproxy-qns-libressl:local",
     "url": "https://github.com/haproxy/haproxy",
     "role": "server"
   }
