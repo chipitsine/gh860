@@ -1,7 +1,7 @@
 FROM ubuntu:20.04 AS builder-ssl
 
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get -y update && apt-get -y install git g++ make gcc wget libasan5 autoconf libtool cmake 
+RUN apt-get -y update && apt-get -y install git g++ make gcc wget libasan5 autoconf libtool cmake curl
 
 RUN git clone https://github.com/aws/aws-lc
 RUN cd aws-lc && export GIMME_GO_VERSION=1.18 && curl -sL https://raw.githubusercontent.com/travis-ci/gimme/master/gimme > gimme && bash gimme && export GOROOT='/root/.gimme/versions/go1.18.linux.amd64' && export PATH="/root/.gimme/versions/go1.18.linux.amd64/bin:${PATH}" && cmake -DBUILD_SHARED_LIBS=1 -B build && make -C build && make -C build install
@@ -18,7 +18,6 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -y update && apt-get -y install git make gcc liblua5.3-0 liblua5.3-dev \
   && git clone https://github.com/haproxy/haproxy haproxy \
   && cd /haproxy \
-  && git checkout 2c9bd3ae808872e52c07d7ec1d62f734dcbb6776 \
   && patch -p1 < /tmp/0001-Add-timestamps-to-stderr-sink.patch \
   && make -j $(nproc) \
     CC=gcc \
